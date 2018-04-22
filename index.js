@@ -52,4 +52,4 @@ app.post('/check', async (req, res) => {
     }
 });
 
-app.listen(3000, () => console.log('Server started.'));
+app.listen(process.env.PORT || 3000, () => console.log('Server started.'));
