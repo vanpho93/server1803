@@ -1,6 +1,7 @@
 const express = require('express');
 const { json } = require('body-parser');
 const { hash, compare } = require('bcryptjs');
+const { sign } = require('./jwt');
 require('./connectDatabase');
 const { User } = require('./User');
 
@@ -29,6 +30,7 @@ app.post('/signin', async (req, res) => {
         const same = await compare(password, user.password);
         if (!same) throw new Error('Cannot find user.');
         const userInfo = user.toObject();
+        userInfo.token = await sign({ _id: user._id });
         delete userInfo.password;
         res.send({ success: true, user: userInfo });
     } catch (error) {
