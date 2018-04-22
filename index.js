@@ -1,7 +1,7 @@
 const express = require('express');
 const { json } = require('body-parser');
 const { hash, compare } = require('bcryptjs');
-const { sign } = require('./jwt');
+const { sign, verify } = require('./jwt');
 require('./connectDatabase');
 const { User } = require('./User');
 
@@ -38,5 +38,18 @@ app.post('/signin', async (req, res) => {
     }
 });
 
-// app.post('/check', (req, res) => {});
+app.post('/check', async (req, res) => {
+    try {
+        const { _id } = await verify(req.body.token);
+        const user = await User.findById(_id);
+        if (!user) throw new Error('Cannot find user.');
+        const userInfo = user.toObject();
+        userInfo.token = await sign({ _id: user._id });
+        delete userInfo.password;
+        res.send({ success: true, user: userInfo });
+    } catch (error) {
+        res.status(400).send({ success: false, error: error.message });
+    }
+});
+
 app.listen(3000, () => console.log('Server started.'));
